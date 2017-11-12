@@ -51,13 +51,13 @@ public class WikiCrawler {
 			String currentUrl = q.remove();
 			String pageHTML = getPageAsString(currentUrl);
 			i++;
-			if(pageHasTopics(pageHTML)) {
-				ArrayList<String> links = extractLinks(pageHTML);
-				int numberOfLinksExtracted = 0;
-				for (String link : links) {
-					if (numberOfLinksExtracted >= max_pages - 1) {
-						break;
-					}
+			ArrayList<String> links = extractLinks(pageHTML);
+			int numberOfLinksExtracted = 0;
+			for (String link : links) {
+				if (numberOfLinksExtracted >= max_pages - 1) {
+					break;
+				}
+				if(pageHasTopics(getPageAsString(link))) {
 					if (!visited.contains(link)) {
 						numberOfLinksExtracted++;
 						q.add(link);
