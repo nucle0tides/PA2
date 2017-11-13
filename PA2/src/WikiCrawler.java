@@ -56,13 +56,13 @@ public class WikiCrawler {
 	public void crawl() throws InterruptedException, IOException{
 		WebGraph graph = new WebGraph();
 		// if seed url contains all topics
-		if(verifySeedURL()) { 
+		if(verifyURL(this.seed_url)) { 
 			//initialize Queue Q and list visited 
 			// place seed url in Q and visited 
 			page_queue.add(this.seed_url);
 			visited.add(this.seed_url);
 			// while the queue is not empty
-			while(!page_queue.isEmpty() && visited.size() <= this.max_pages - 1) { 
+			while(!page_queue.isEmpty() && graph.getVertices().size() <= this.max_pages - 1) { 
 				String current_page = page_queue.remove();
 				// add to graph
 				graph.addVertex(current_page);
@@ -71,11 +71,23 @@ public class WikiCrawler {
 				// extract all links
 				ArrayList<String> links = extractLinks(current_page_html);
 				int num_links_extracted = 0;
-				
-				
 				// for every link u in current page 
 				for (String link : links) {
 					if(num_links_extracted <= this.max_pages - 1) { 
+						// page to visit must contain topics too
+//						if(verifyURL(link)) { 
+//							// if u is not visited
+//							if(!visited.contains(link)) { 
+//								num_links_extracted++;
+//								// add u to end of queue 
+//								page_queue.add(link);
+//								// add u to visited 
+//								visited.add(link);
+//								System.out.println(link);
+//								// add edge from current_page -> link 
+//								graph.addEdge(current_page, link);
+//							}
+//						}
 						// if u is not visited
 						if(!visited.contains(link)) { 
 							num_links_extracted++;
@@ -87,9 +99,6 @@ public class WikiCrawler {
 							// add edge from current_page -> link 
 							graph.addEdge(current_page, link);
 						}
-					}
-					else { 
-						break;
 					}
 				}
 			}
@@ -104,8 +113,8 @@ public class WikiCrawler {
 	 * @throws IOException 
 	 * @throws InterruptedException 
 	 */
-	private boolean verifySeedURL() throws InterruptedException, IOException { 
-		String page = getPageAsString(this.seed_url);
+	private boolean verifyURL(String url) throws InterruptedException, IOException { 
+		String page = getPageAsString(url);
 		return pageHasTopics(page);
 	}
 	
@@ -172,12 +181,7 @@ public class WikiCrawler {
 		FileWriter writer = new FileWriter(f);
         ArrayList<String> graph_vertices = g.getVertices();
         HashMap<String, ArrayList<String>> graph_adj = g.getAdjacencyMatrix();
-        int num_vertices = 0;
-        for(String vertex : graph_vertices) { 
-        	ArrayList<String> vertex_edges = graph_adj.get(vertex); 
-        	num_vertices += vertex_edges.size();
-        }
-        writer.append(num_vertices + "\n");
+        writer.append(g.getVertices().size() + "\n");
         for(int i = 0; i < graph_vertices.size(); i++) { 
         	String current_vertex = graph_vertices.get(i);
         	ArrayList<String> vertex_edges = graph_adj.get(current_vertex);

@@ -25,7 +25,6 @@ public class WebGraph {
 			vertices.add(toAdd); 
 			adjacency_matrix.put(toAdd, new ArrayList<String>());
 		}
-		
 	}
 	
 	/**
