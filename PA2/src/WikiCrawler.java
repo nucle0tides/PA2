@@ -71,7 +71,7 @@ public class WikiCrawler {
 				graph.addVertex(current_page);
 				int num_pages_extracted = 0;
 				for(String link : links) { 
-					if(graph.getVertices().size() < this.max_pages && num_pages_extracted < links.size()) { 
+					if(graph.getVertices().size() < this.max_pages && num_pages_extracted < this.max_pages) { 
 						if(verifyURL(link)) { 
 							graph.addVertex(link);
 							if(!visited.contains(link)) { 
