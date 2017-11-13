@@ -62,43 +62,28 @@ public class WikiCrawler {
 			page_queue.add(this.seed_url);
 			visited.add(this.seed_url);
 			// while the queue is not empty
-			while(!page_queue.isEmpty() && graph.getVertices().size() <= this.max_pages - 1) { 
+			while(!page_queue.isEmpty()) { 
 				String current_page = page_queue.remove();
-				// add to graph
-				graph.addVertex(current_page);
 				// request current
 				String current_page_html = getPageAsString(current_page);
 				// extract all links
 				ArrayList<String> links = extractLinks(current_page_html);
-				int num_links_extracted = 0;
-				// for every link u in current page 
-				for (String link : links) {
-					if(num_links_extracted <= this.max_pages - 1) { 
-						// page to visit must contain topics too
-//						if(verifyURL(link)) { 
-//							// if u is not visited
-//							if(!visited.contains(link)) { 
-//								num_links_extracted++;
-//								// add u to end of queue 
-//								page_queue.add(link);
-//								// add u to visited 
-//								visited.add(link);
-//								System.out.println(link);
-//								// add edge from current_page -> link 
-//								graph.addEdge(current_page, link);
-//							}
-//						}
-						// if u is not visited
-						if(!visited.contains(link)) { 
-							num_links_extracted++;
-							// add u to end of queue 
-							page_queue.add(link);
-							// add u to visited 
-							visited.add(link);
-							System.out.println(link);
-							// add edge from current_page -> link 
-							graph.addEdge(current_page, link);
+				graph.addVertex(current_page);
+				int num_pages_extracted = 0;
+				for(String link : links) { 
+					if(graph.getVertices().size() < this.max_pages && num_pages_extracted < links.size()) { 
+						if(verifyURL(link)) { 
+							graph.addVertex(link);
+							if(!visited.contains(link)) { 
+								page_queue.add(link);
+								visited.add(link);
+								graph.addEdge(current_page, link);
+							}
 						}
+					}
+					if(graph.getVertices().size() == this.max_pages) { 
+						// max num of vertices reached
+						break;
 					}
 				}
 			}
@@ -158,9 +143,6 @@ public class WikiCrawler {
 	 * @return true if page contains all topics, false otherwise
 	 */
 	private boolean pageHasTopics(String page_html){
-		if(this.topics.size() == 0) { 
-			return false;
-		}
 		for (String topic : this.topics) { 
 			if(!page_html.contains(topic)) { 
 				return false; 
