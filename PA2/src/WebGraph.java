@@ -41,7 +41,13 @@ public class WebGraph {
 		 */
 		if(!vertex.equals(edge)) { 
 			// add edge to list of vertex edges
-			this.adjacency_matrix.get(vertex).add(edge);
+			if(this.adjacency_matrix.get(vertex) != null) { 
+				this.adjacency_matrix.get(vertex).add(edge);
+			}
+			else { 
+				this.adjacency_matrix.put(vertex, new ArrayList<String>());
+				this.adjacency_matrix.get(vertex).add(edge);
+			}
 		}
 		
 	}
@@ -50,7 +56,7 @@ public class WebGraph {
 	 * 
 	 * @return
 	 */
-	public HashMap<String, ArrayList<String>> getAdjacencyMatric() { 
+	public HashMap<String, ArrayList<String>> getAdjacencyMatrix() { 
 		return this.adjacency_matrix;
 	}
 	

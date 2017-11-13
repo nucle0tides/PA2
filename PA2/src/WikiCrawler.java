@@ -14,7 +14,7 @@ public class WikiCrawler {
 	private String file_name; 
 	private ArrayList<String> topics;
     private Queue<String> page_queue = new ArrayDeque<>();
-    private ArrayList<String> visited = new ArrayList<String>(); 
+    private HashSet<String> visited = new HashSet<String>();
 	// only make 50 requests at a time. 
 	private static final int MAX_REQUESTS = 50;
     private int requests = 0;
@@ -65,12 +65,14 @@ public class WikiCrawler {
 			while(!page_queue.isEmpty()) { 
 				String current_page = page_queue.remove();
 				// add to graph
-				graph.addVertex(this.seed_url);
+//				graph.addVertex(current_page);
 				// request current
 				String current_page_html = getPageAsString(current_page);
 				// extract all links
 				ArrayList<String> links = extractLinks(current_page_html);
 				int num_links_extracted = 0;
+				
+				
 				// for every link u in current page 
 				for (String link : links) {
 					if(num_links_extracted <= this.max_pages - 1) { 
@@ -81,13 +83,18 @@ public class WikiCrawler {
 							page_queue.add(link);
 							// add u to visited 
 							visited.add(link);
+							System.out.println(link);
 							// add edge from current_page -> link 
-							graph.addEdge(current_page, link);
+//							graph.addEdge(current_page, link);
 						}
+					}
+					else { 
+						break;
 					}
 				}
 			}
 		}
+		graphToFile(graph);
 	}
 	
 	/**
@@ -111,9 +118,9 @@ public class WikiCrawler {
 	 */
 	private String getPageAsString(String current_url) throws InterruptedException, IOException{
 		// do not do more than 50 requests at a time.
-		if(requests >= 50) { 
+		if(this.requests >= MAX_REQUESTS) { 
 			Thread.sleep(3000);
-			requests = 0;
+			this.requests = 0;
 		}
 		
 		// connect!
@@ -128,12 +135,11 @@ public class WikiCrawler {
 		
 		// read page
 		while((page_html = page_reader.readLine()) != null) { 
-			System.out.println(page_html);
 			builder.append(page_html);
 		}
 		
 		String final_page = builder.toString();
-		requests += 1; 
+		this.requests += 1; 
 		return final_page;
 	}
 
@@ -143,6 +149,9 @@ public class WikiCrawler {
 	 * @return true if page contains all topics, false otherwise
 	 */
 	private boolean pageHasTopics(String page_html){
+		if(this.topics.size() == 0) { 
+			return false;
+		}
 		for (String topic : this.topics) { 
 			if(!page_html.contains(topic)) { 
 				return false; 
@@ -150,5 +159,29 @@ public class WikiCrawler {
 			
 		}
 		return true;
+	}
+	
+	/**
+	 * 
+	 * @param g
+	 * @throws IOException 
+	 */
+	private void graphToFile(WebGraph g) throws IOException { 
+		File f = new File(this.file_name);
+		// https://docs.oracle.com/javase/7/docs/api/java/io/FileWriter.html
+		FileWriter writer = new FileWriter(f);
+		writer.append(g.getVertices().size() + "\n");
+        ArrayList<String> graph_vertices = g.getVertices();
+        HashMap<String, ArrayList<String>> graph_adj = g.getAdjacencyMatrix();
+        for(int i = 0; i < graph_vertices.size(); i++) { 
+        	String current_vertex = graph_vertices.get(i);
+        	ArrayList<String> vertex_edges = graph_adj.get(current_vertex);
+        	for(int j = 0; j < vertex_edges.size(); j++) { 
+        		String current_edge = vertex_edges.get(j); 
+        		writer.append(current_vertex + " " + current_edge + "\n");
+        	}
+        }
+        writer.flush();
+        writer.close();
 	}
 }
