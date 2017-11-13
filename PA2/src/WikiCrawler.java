@@ -62,10 +62,10 @@ public class WikiCrawler {
 			page_queue.add(this.seed_url);
 			visited.add(this.seed_url);
 			// while the queue is not empty
-			while(!page_queue.isEmpty()) { 
+			while(!page_queue.isEmpty() && visited.size() <= this.max_pages - 1) { 
 				String current_page = page_queue.remove();
 				// add to graph
-//				graph.addVertex(current_page);
+				graph.addVertex(current_page);
 				// request current
 				String current_page_html = getPageAsString(current_page);
 				// extract all links
@@ -85,7 +85,7 @@ public class WikiCrawler {
 							visited.add(link);
 							System.out.println(link);
 							// add edge from current_page -> link 
-//							graph.addEdge(current_page, link);
+							graph.addEdge(current_page, link);
 						}
 					}
 					else { 
@@ -170,9 +170,14 @@ public class WikiCrawler {
 		File f = new File(this.file_name);
 		// https://docs.oracle.com/javase/7/docs/api/java/io/FileWriter.html
 		FileWriter writer = new FileWriter(f);
-		writer.append(g.getVertices().size() + "\n");
         ArrayList<String> graph_vertices = g.getVertices();
         HashMap<String, ArrayList<String>> graph_adj = g.getAdjacencyMatrix();
+        int num_vertices = 0;
+        for(String vertex : graph_vertices) { 
+        	ArrayList<String> vertex_edges = graph_adj.get(vertex); 
+        	num_vertices += vertex_edges.size();
+        }
+        writer.append(num_vertices + "\n");
         for(int i = 0; i < graph_vertices.size(); i++) { 
         	String current_vertex = graph_vertices.get(i);
         	ArrayList<String> vertex_edges = graph_adj.get(current_vertex);
