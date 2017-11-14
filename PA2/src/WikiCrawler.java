@@ -4,10 +4,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.Thread.sleep;
-
-//TODO: cache pages ive already looked to to avoid making multiple html calls.
-
 public class WikiCrawler {
 	
 	private static final String BASE_URL = "https://en.wikipedia.org";
@@ -17,6 +13,7 @@ public class WikiCrawler {
 	private ArrayList<String> topics;
     private Queue<String> page_queue = new ArrayDeque<>();
     private HashSet<String> visited = new HashSet<String>();
+    private HashMap<String, String> html_pages = new HashMap<>();
 	// only make 50 requests at a time. 
 	private static final int MAX_REQUESTS = 50;
     private int requests = 0;
@@ -85,7 +82,6 @@ public class WikiCrawler {
 						if(visited.contains(link)){
 							graph.addEdge(current_page, link);
 						}
-						//break;
 					}
 				}
 			}
@@ -114,6 +110,10 @@ public class WikiCrawler {
 	 */
 	private String getPageAsString(String current_url) throws InterruptedException, IOException{
 		// do not do more than 50 requests at a time.
+		if(html_pages.get(current_url)!= null){
+			return html_pages.get(current_url);
+		}
+
 		if(this.requests >= MAX_REQUESTS) { 
 			Thread.sleep(3000);
 			this.requests = 0;
@@ -135,6 +135,7 @@ public class WikiCrawler {
 		}
 		
 		String final_page = builder.toString();
+		html_pages.put(current_url, final_page);
 		this.requests += 1; 
 		return final_page;
 	}
