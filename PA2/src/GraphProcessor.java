@@ -17,7 +17,7 @@ public class GraphProcessor {
 	
 	/**
 	 * Return the out degree of vertex v.
-	 * @param v
+	 * @param v - input vertex
 	 * @return out degree of vertex v.
 	 */
 	public int outDegree(String v) {
@@ -30,6 +30,7 @@ public class GraphProcessor {
 	
 	/**
 	 * Calculate the BFS path from vertex u to vertex v.
+	 * 
 	 * @param u, start vertex
 	 * @param v, finish vertex
 	 * @return ArrayList of strings repr bfs path from vertex u to vertex v.
@@ -58,6 +59,7 @@ public class GraphProcessor {
 				for (String edge : edges) {
 					// if edge is unvisited
 					if (!visited.contains(edge)) {
+						// keeping track of parent to mimic a tree like structure
 						parent.put(edge, current);
 						bfs_queue.add(edge);
 						visited.add(edge);
@@ -71,6 +73,7 @@ public class GraphProcessor {
 	    	return new ArrayList<String>();
 	    }
 	    
+	    // create reverse of the path
 	    ArrayList<String> rev_path = new ArrayList<String>();
 	    rev_path.add(v);
 	    while(path_vertex != null) { 
@@ -144,6 +147,11 @@ public class GraphProcessor {
 		return path_counts;
 	}
 	
+	/**
+	 * Given a filename, graphData, fills a WebGraph object with vertices and edges. 
+	 * @param graphData
+	 * @throws FileNotFoundException
+	 */
 	private void constructGraph(String graphData) throws FileNotFoundException { 
 		File f = new File(graphData);
 		Scanner s = new Scanner(f);
@@ -158,6 +166,12 @@ public class GraphProcessor {
 		s.close();
 	}
 	
+	/**
+	 * Method to process a line of graphData.
+	 * Given a line 'v1 v2' where v1 has an edge to v2
+	 * Adds two vertices v1 and v2, and creates an edge from v1 to v2
+	 * @param vertex_edge
+	 */
 	private void processVertexEdgeLine(String vertex_edge) { 
 		Scanner line_scanner = new Scanner(vertex_edge);
 		String vertex = line_scanner.next();
@@ -172,7 +186,7 @@ public class GraphProcessor {
 	/**
 	 * Method to determine whether a graph is strongly connected 
 	 * i.e., each node can reach every other node
-	 * @return
+	 * @return true if there exists a path from each vertex to all other vertices, false otherwise. 
 	 */
 	private boolean isStronglyConnected() { 
 		ArrayList<String> vertices = graph.getVertices();
@@ -190,9 +204,9 @@ public class GraphProcessor {
 	
 	/** 
 	 * Method to determine if there exists a path between 
-	 * @param u
-	 * @param v
-	 * @return
+	 * @param u - starting vertex
+	 * @param v - ending vertex
+	 * @return true if there exists a path from u -> v, false otherwise. 
 	 */
 	private boolean bfsPathExists(String u, String v) { 
 	    Queue<String> bfs_queue = new ArrayDeque<>();

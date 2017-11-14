@@ -54,16 +54,17 @@ public class WebGraph {
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Method to get the adjacency matrix of a WebGraph object. 
+	 * @return HashMap<String, ArrayList<String>> containing the vertex -> edge mappings
+	 * for all vertices in a WebGraph object. 
 	 */
 	public HashMap<String, ArrayList<String>> getAdjacencyMatrix() { 
 		return this.adjacency_matrix;
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Method to get the vertices of WebGraph object. 
+	 * @return ArrayList<String> containing all vertices. 
 	 */
 	public ArrayList<String> getVertices() { 
 		return this.vertices;

@@ -26,6 +26,12 @@ public class WikiCrawler {
 		this.topics = topics;
 	}
 
+	/**
+	 * Method to extract the links from a Wikipedia page. 
+	 * Extracts all links after the first paragraph tag.
+	 * @param doc
+	 * @return
+	 */
 	public ArrayList<String> extractLinks(String doc) {
 		ArrayList<String> page_links = new ArrayList<String>();
 		/*
@@ -159,7 +165,7 @@ public class WikiCrawler {
 
 	
 	/**
-	 * 
+	 * Method to write a WebGraph object to a file.
 	 * @param g
 	 * @throws IOException 
 	 */
