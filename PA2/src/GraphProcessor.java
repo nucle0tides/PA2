@@ -3,7 +3,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class GraphProcessor {
-	
+
 	public WebGraph graph;
 	private int num_vertices;
 	private ArrayList<HashSet<String>> strongly_connected_components;

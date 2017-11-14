@@ -40,8 +40,10 @@ public class WebGraph {
 		 */
 		if(!vertex.equals(edge)) { 
 			// add edge to list of vertex edges
-			if(this.adjacency_matrix.get(vertex) != null) { 
-				this.adjacency_matrix.get(vertex).add(edge);
+			if(this.adjacency_matrix.get(vertex) != null) {
+				if(!this.adjacency_matrix.get(vertex).contains(edge)){
+					this.adjacency_matrix.get(vertex).add(edge);
+				}
 			}
 			else { 
 				this.adjacency_matrix.put(vertex, new ArrayList<String>());
