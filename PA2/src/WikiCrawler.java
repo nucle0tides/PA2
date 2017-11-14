@@ -69,9 +69,8 @@ public class WikiCrawler {
 				// extract all links
 				ArrayList<String> links = extractLinks(current_page_html);
 				graph.addVertex(current_page);
-				int num_pages_extracted = 0;
-				for(String link : links) { 
-					if(graph.getVertices().size() < this.max_pages && num_pages_extracted < this.max_pages) { 
+				for(String link : links) {
+					if(graph.getVertices().size() < this.max_pages) {
 						if(verifyURL(link)) { 
 							graph.addVertex(link);
 							if(!visited.contains(link)) { 
@@ -80,10 +79,11 @@ public class WikiCrawler {
 								graph.addEdge(current_page, link);
 							}
 						}
-					}
-					if(graph.getVertices().size() == this.max_pages) { 
-						// max num of vertices reached
-						break;
+					}else{
+						if(visited.contains(link)){
+							graph.addEdge(current_page, link);
+						}
+						//break;
 					}
 				}
 			}

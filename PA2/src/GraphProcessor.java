@@ -4,7 +4,9 @@ import java.io.File;
 public class GraphProcessor {
 	
 	public GraphProcessor(String graphData) { 
-		
+		//Generate all paths hash map <String , ArrayList<String>>
+		//Keep track of diameter
+		//Hash map for verticies for centrality
 	}
 	
 	/**
