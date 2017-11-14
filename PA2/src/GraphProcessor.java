@@ -7,14 +7,15 @@ public class GraphProcessor {
 
 	public WebGraph graph;
 	private int num_vertices;
+	private boolean is_strongly_connected;
 	
 	public GraphProcessor(String graphData) throws FileNotFoundException { 
 		this.graph = new WebGraph();
 		constructGraph(graphData);
+		this.is_strongly_connected = isStronglyConnected();
 	}
 	
 	/**
-	 * 	 * TODO: Double check this with a simpler example
 	 * Return the out degree of vertex v.
 	 * @param v
 	 * @return out degree of vertex v.
@@ -44,7 +45,6 @@ public class GraphProcessor {
 	    
 	    if(u.equals(v)) { 
 	    	ArrayList<String> path = new ArrayList<String>();
-	    	path.add(u);
 	    	path.add(v);
 	    	return path;
 	    }
@@ -95,21 +95,25 @@ public class GraphProcessor {
 	 * @return diameter of the graph. 
 	 */
 	public int diameter() { 
-		int longest_path = 0;
-		ArrayList<String> vertices = graph.getVertices();
-		for (String v1: vertices) { 
-			for (String v2: vertices) { 
-				ArrayList<String> path = bfsPath(v1, v2);
-				if(path.size() > longest_path) { 
-					longest_path = path.size();
+		if(this.is_strongly_connected) { 
+			int longest_path = 0;
+			ArrayList<String> vertices = graph.getVertices();
+			for (String v1: vertices) { 
+				for (String v2: vertices) { 
+					ArrayList<String> path = bfsPath(v1, v2);
+					if(path.size() > longest_path) { 
+						longest_path = path.size();
+					}
 				}
 			}
+			return longest_path;
 		}
-		return longest_path;
+		else { 
+			return 2 * this.num_vertices;
+		}
 	}
 	
 	/**
-	 * TODO: Double check this with a simpler example
 	 * Given a vertex x in V, the centrality of x is the number 
 	 * of shortest paths that go via x. 
 	 * 
@@ -131,7 +135,6 @@ public class GraphProcessor {
 				//Checking for self-paths, if we have the
 				//path start and end at the vertex,
 				//and it is the only thing in the path, it is a self path.
-				path.remove(v);
 				path.remove(v);
 				if(path.size() != 0){
 					path_counts += 1;
@@ -166,7 +169,70 @@ public class GraphProcessor {
 		line_scanner.close();
 	}
 	
-	public static void main(String[] args) throws FileNotFoundException { 
+	/**
+	 * Method to determine whether a graph is strongly connected 
+	 * i.e., each node can reach every other node
+	 * @return
+	 */
+	private boolean isStronglyConnected() { 
+		ArrayList<String> vertices = graph.getVertices();
+		for (String v1 : vertices) { 
+			for (String v2 : vertices) { 
+				if(!v1.equals(v2)) { 
+					if(!bfsPathExists(v1, v2)) { 
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+	
+	/** 
+	 * Method to determine if there exists a path between 
+	 * @param u
+	 * @param v
+	 * @return
+	 */
+	private boolean bfsPathExists(String u, String v) { 
+	    Queue<String> bfs_queue = new ArrayDeque<>();
+	    HashSet<String> visited = new HashSet<String>();
+	    HashMap<String, String> parent = new HashMap<String, String>();
+	    
+	    bfs_queue.add(u);
+	    visited.add(u);
+	    parent.put(u, null);
+	    
+	    if(u.equals(v)) { 
+	    	return false; 
+	    }
+	    
+	    // while queue is not empty
+	    while(!bfs_queue.isEmpty()) { 
+	    	String current = bfs_queue.remove();
+	    	ArrayList<String> edges = graph.getAdjacencyMatrix().get(current);
+	    	// for each edge, w, current -> w
+			if(edges != null) {
+				for (String edge : edges) {
+					// if edge is unvisited
+					if (!visited.contains(edge)) {
+						parent.put(edge, current);
+						bfs_queue.add(edge);
+						visited.add(edge);
+					}
+				}
+			}
+	    }
+	    
+	    String path_vertex = parent.get(v);
+	    if(path_vertex == null) { 
+	    	return false;
+	    }
+	    
+	    return true;
+	}
+	
+	public static void main(String[] args) throws FileNotFoundException {
 		GraphProcessor gp = new GraphProcessor("/home/nick/Documents/Github/PA2/WikiCS.txt");
 		System.out.println(gp.num_vertices);
 		int num_edges=0;
@@ -204,6 +270,6 @@ public class GraphProcessor {
 		}
 
 		System.out.println("Largest centrality: " + centrality+ ". vertex: "+ vertex_with_largest_centrality);
-		System.out.println(gp.outDegree("Ames"));
+		
 	}
 }
