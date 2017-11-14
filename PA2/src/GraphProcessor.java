@@ -18,11 +18,11 @@ public class GraphProcessor {
 	 * @param v
 	 * @return out degree of vertex v.
 	 */
-	public int outDegree(String v) { 
-        HashMap<String, ArrayList<String>> vertex_edges = graph.getAdjacencyMatrix();
-        if(vertex_edges.containsKey(v)){
-            return vertex_edges.get(v).size();
-        }
+	public int outDegree(String v) {
+		//If the vertex is in the matrix
+        if(graph.getAdjacencyMatrix().get(v) != null){
+        	return graph.getAdjacencyMatrix().get(v).size();
+		}
         return 0;
 	}
 	
@@ -53,14 +53,16 @@ public class GraphProcessor {
 	    	String current = bfs_queue.remove();
 	    	ArrayList<String> edges = graph.getAdjacencyMatrix().get(current);
 	    	// for each edge, w, current -> w
-	    	for(String edge : edges) { 
-	    		// if edge is unvisited
-	    		if(!visited.contains(edge)) { 
-	    			parent.put(edge, current);
-	    			bfs_queue.add(edge);
-	    			visited.add(edge);
-	    		}
-	    	}
+			if(edges != null) {
+				for (String edge : edges) {
+					// if edge is unvisited
+					if (!visited.contains(edge)) {
+						parent.put(edge, current);
+						bfs_queue.add(edge);
+						visited.add(edge);
+					}
+				}
+			}
 	    }
 	    
 	    String path_vertex = parent.get(v);
@@ -118,14 +120,26 @@ public class GraphProcessor {
 		ArrayList<ArrayList<String>> paths = new ArrayList<ArrayList<String>>();
 		ArrayList<String> vertices = graph.getVertices();
 		for (String v1 : vertices) { 
-			for (String v2 : vertices) { 
-				paths.add(bfsPath(v1, v2));
+			for (String v2 : vertices) {
+				System.out.println("---------------------------");
+				ArrayList<String> bfsPath = bfsPath(v1, v2);
+				for(int i=0;i<bfsPath.size();i++){
+					System.out.println(bfsPath.get(i));
+				}
+				paths.add(bfsPath);
 			}
 		}
 		int path_counts = 0;
 		for (ArrayList<String> path : paths) { 
-			if(path.contains(v)) { 
-				path_counts += 1;
+			if(path.contains(v)) {
+				//Checking for self-paths, if we have the
+				//path start and end at the vertex,
+				//and it is the only thing in the path, it is a self path.
+				path.remove(v);
+				path.remove(v);
+				if(path.size() != 0){
+					path_counts += 1;
+				}
 			}
 		}
 		return path_counts;
@@ -151,12 +165,14 @@ public class GraphProcessor {
 		String edge = line_scanner.next();
 		
 		this.graph.addVertex(vertex);
+		this.graph.addVertex(edge);
 		this.graph.addEdge(vertex, edge);
 		line_scanner.close();
 	}
 	
 	public static void main(String[] args) throws FileNotFoundException { 
-		GraphProcessor gp = new GraphProcessor("WikiComplexity.txt");
-		System.out.println(gp.outDegree("/wiki/Complexity"));
+		GraphProcessor gp = new GraphProcessor("/home/nick/Documents/Github/PA2/PA2/smallTest.txt");
+		System.out.println(gp.diameter());
+		System.out.println(gp.outDegree("Ames"));
 	}
 }

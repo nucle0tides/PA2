@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 
 import static java.lang.Thread.sleep;
 
+//TODO: cache pages ive already looked to to avoid making multiple html calls.
+
 public class WikiCrawler {
 	
 	private static final String BASE_URL = "https://en.wikipedia.org";
@@ -63,7 +65,7 @@ public class WikiCrawler {
 			visited.add(this.seed_url);
 			// while the queue is not empty
 			while(!page_queue.isEmpty()) { 
-				String current_page = page_queue.remove();
+				String current_page = page_queue.poll();
 				// request current
 				String current_page_html = getPageAsString(current_page);
 				// extract all links
@@ -143,14 +145,17 @@ public class WikiCrawler {
 	 * @return true if page contains all topics, false otherwise
 	 */
 	private boolean pageHasTopics(String page_html){
-		for (String topic : this.topics) { 
-			if(!page_html.contains(topic)) { 
-				return false; 
+		for (String topic : this.topics) {
+			Pattern link_pattern = Pattern.compile(topic,  Pattern.CASE_INSENSITIVE|Pattern.DOTALL);
+			Matcher matcher = link_pattern.matcher(page_html);
+			if(!matcher.find()) {
+				return false;
 			}
-			
+
 		}
 		return true;
 	}
+
 	
 	/**
 	 * 
