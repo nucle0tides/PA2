@@ -12,16 +12,21 @@ public class GraphProcessor {
 	public GraphProcessor(String graphData) throws FileNotFoundException { 
 		this.graph = new WebGraph();
 		constructGraph(graphData);
+		// construct SCCs
 	}
 	
 	/**
+	 * 	 * TODO: Double check this with a simpler example
 	 * Return the out degree of vertex v.
 	 * @param v
 	 * @return out degree of vertex v.
 	 */
 	public int outDegree(String v) { 
-		
-		return 0;
+        HashMap<String, ArrayList<String>> vertex_edges = graph.getAdjacencyMatrix();
+        if(vertex_edges.containsKey(v)){
+            return vertex_edges.get(v).size();
+        }
+        return 0;
 	}
 	
 	/**
@@ -38,6 +43,13 @@ public class GraphProcessor {
 	    bfs_queue.add(u);
 	    visited.add(u);
 	    parent.put(u, null);
+	    
+	    if(u.equals(v)) { 
+	    	ArrayList<String> path = new ArrayList<String>();
+	    	path.add(u);
+	    	path.add(v);
+	    	return path;
+	    }
 	    
 	    // while queue is not empty
 	    while(!bfs_queue.isEmpty()) { 
@@ -87,6 +99,7 @@ public class GraphProcessor {
 	}
 	
 	/**
+	 * TODO: Double check this with a simpler example
 	 * Given a vertex x in V, the centrality of x is the number 
 	 * of shortest paths that go via x. 
 	 * 
@@ -95,8 +108,20 @@ public class GraphProcessor {
 	 * @return
 	 */
 	public int centrality(String v) { 
-		
-		return 0;
+		ArrayList<ArrayList<String>> paths = new ArrayList<ArrayList<String>>();
+		ArrayList<String> vertices = graph.getVertices();
+		for (String v1 : vertices) { 
+			for (String v2 : vertices) { 
+				paths.add(bfsPath(v1, v2));
+			}
+		}
+		int path_counts = 0;
+		for (ArrayList<String> path : paths) { 
+			if(path.contains(v)) { 
+				path_counts += 1;
+			}
+		}
+		return path_counts;
 	}
 	
 	private void constructGraph(String graphData) throws FileNotFoundException { 
@@ -125,6 +150,6 @@ public class GraphProcessor {
 	
 	public static void main(String[] args) throws FileNotFoundException { 
 		GraphProcessor gp = new GraphProcessor("WikiComplexity.txt");
-		System.out.println(gp.bfsPath("/wiki/Dynamical_systems_theory", "/wiki/Biological_organisation").toString());
+		System.out.println(gp.outDegree("/wiki/Complexity"));
 	}
 }
