@@ -12,7 +12,6 @@ public class GraphProcessor {
 	public GraphProcessor(String graphData) throws FileNotFoundException { 
 		this.graph = new WebGraph();
 		constructGraph(graphData);
-		// construct SCCs
 	}
 	
 	/**
@@ -95,7 +94,17 @@ public class GraphProcessor {
 	 * @return diameter of the graph. 
 	 */
 	public int diameter() { 
-		return 0; 
+		int longest_path = 0;
+		ArrayList<String> vertices = graph.getVertices();
+		for (String v1: vertices) { 
+			for (String v2: vertices) { 
+				ArrayList<String> path = bfsPath(v1, v2);
+				if(path.size() > longest_path) { 
+					longest_path = path.size();
+				}
+			}
+		}
+		return longest_path;
 	}
 	
 	/**
