@@ -6,8 +6,6 @@ public class GraphProcessor {
 
 	public WebGraph graph;
 	private int num_vertices;
-	private ArrayList<HashSet<String>> strongly_connected_components;
-	private HashSet<String> scc_visited = new HashSet<String>();
 	
 	public GraphProcessor(String graphData) throws FileNotFoundException { 
 		this.graph = new WebGraph();
