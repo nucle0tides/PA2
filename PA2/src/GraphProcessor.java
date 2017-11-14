@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -166,8 +167,43 @@ public class GraphProcessor {
 	}
 	
 	public static void main(String[] args) throws FileNotFoundException { 
-		GraphProcessor gp = new GraphProcessor("/home/nick/Documents/Github/PA2/PA2/smallTest.txt");
-		System.out.println(gp.diameter());
+		GraphProcessor gp = new GraphProcessor("/home/nick/Documents/Github/PA2/WikiCS.txt");
+		System.out.println(gp.num_vertices);
+		int num_edges=0;
+		Iterator itr = gp.graph.getAdjacencyMatrix().values().iterator();
+		while(itr.hasNext()){
+			ArrayList<String> edges = (ArrayList<String>) itr.next();
+			num_edges = num_edges + edges.size();
+		}
+		System.out.println("Edges: "+num_edges);
+		Set<String> collection = gp.graph.getAdjacencyMatrix().keySet();
+		Iterator iterator = collection.iterator();
+		int out_degree = 0;
+		String vertex_with_largest_out_degree = "A";
+		while(iterator.hasNext()) {
+			String current_vertex = (String)iterator.next();
+			int current_degree = gp.outDegree(current_vertex);
+			if(current_degree > out_degree){
+				out_degree = current_degree;
+				vertex_with_largest_out_degree = current_vertex;
+			}
+		}
+		System.out.println("Largest out degree: " + out_degree+ ". vertex: "+ vertex_with_largest_out_degree);
+
+		Set<String> collection2 = gp.graph.getAdjacencyMatrix().keySet();
+		Iterator iterator2 = collection2.iterator();
+		int centrality = 0;
+		String vertex_with_largest_centrality = "A";
+		while(iterator2.hasNext()) {
+			String current_vertex = (String)iterator2.next();
+			int current_centrality= gp.centrality(current_vertex);
+			if(current_centrality > centrality){
+				centrality = current_centrality;
+				vertex_with_largest_centrality = current_vertex;
+			}
+		}
+
+		System.out.println("Largest centrality: " + centrality+ ". vertex: "+ vertex_with_largest_centrality);
 		System.out.println(gp.outDegree("Ames"));
 	}
 }
