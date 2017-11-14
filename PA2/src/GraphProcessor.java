@@ -121,12 +121,7 @@ public class GraphProcessor {
 		ArrayList<String> vertices = graph.getVertices();
 		for (String v1 : vertices) { 
 			for (String v2 : vertices) {
-				System.out.println("---------------------------");
-				ArrayList<String> bfsPath = bfsPath(v1, v2);
-				for(int i=0;i<bfsPath.size();i++){
-					System.out.println(bfsPath.get(i));
-				}
-				paths.add(bfsPath);
+				paths.add(bfsPath(v1, v2));
 			}
 		}
 		int path_counts = 0;
