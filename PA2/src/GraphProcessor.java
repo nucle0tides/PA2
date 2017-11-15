@@ -10,7 +10,7 @@ public class GraphProcessor {
 	private boolean strongly_connected;
 	private int diameter;
 	HashMap<String, ArrayList<String>> bfsPaths = new HashMap<>();
-	HashMap<String, HashSet<String>> bfsHash = new HashMap<>();
+	HashMap<String, Integer> centralityHash = new HashMap<>();
 
 	public GraphProcessor(String graphData) throws FileNotFoundException { 
 		this.graph = new WebGraph();
@@ -70,25 +70,15 @@ public class GraphProcessor {
 	 * @return
 	 */
 	public int centrality(String v) {
-		int path_counts = 0;
-		Iterator it = this.bfsHash.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry pair = (Map.Entry)it.next();
-			HashSet<String> path = this.bfsHash.get(pair.getKey());
-			if(path.contains(v)){
-				path_counts++;
-			}
-		}
-
-		return path_counts;
+		return centralityHash.get(v);
 	}
-	
+
 	/**
-	 * Given a filename, graphData, fills a WebGraph object with vertices and edges. 
+	 * Given a filename, graphData, fills a WebGraph object with vertices and edges.
 	 * @param graphData
 	 * @throws FileNotFoundException
 	 */
-	private void constructGraph(String graphData) throws FileNotFoundException { 
+	private void constructGraph(String graphData) throws FileNotFoundException {
 		File f = new File(graphData);
 		Scanner s = new Scanner(f);
 		
@@ -131,6 +121,11 @@ public class GraphProcessor {
 		if(u.equals(v)) {
 			ArrayList<String> path = new ArrayList<String>();
 			path.add(v);
+			if(centralityHash.get(v) == null){
+				centralityHash.put(v, 1);
+			}else{
+				centralityHash.replace(v, centralityHash.get(v) + 1);
+			}
 			return path;
 		}
 
@@ -168,6 +163,11 @@ public class GraphProcessor {
 		ArrayList<String> path = new ArrayList<String>();
 		for(int i = rev_path.size() - 1; i >= 0; i--) {
 			path.add(rev_path.get(i));
+			if(centralityHash.get(rev_path.get(i)) == null){
+				centralityHash.put(rev_path.get(i), 1);
+			}else{
+				centralityHash.replace(rev_path.get(i), centralityHash.get(rev_path.get(i)) + 1);
+			}
 		}
 		return path;
 	}
@@ -183,7 +183,6 @@ public class GraphProcessor {
 					this.diameter = pathresult.size();
 				}
 				bfsPaths.put(v1+v2,pathresult);
-				bfsHash.put(v1+v2, new HashSet<>(pathresult));
 			}
 		}
 	}
