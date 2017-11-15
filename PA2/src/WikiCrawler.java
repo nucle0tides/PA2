@@ -4,8 +4,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.Thread.sleep;
-
 public class WikiCrawler {
 	
 	private static final String BASE_URL = "https://en.wikipedia.org";
@@ -15,6 +13,7 @@ public class WikiCrawler {
 	private ArrayList<String> topics;
     private Queue<String> page_queue = new ArrayDeque<>();
     private HashSet<String> visited = new HashSet<String>();
+    private HashMap<String, String> html_pages = new HashMap<>();
 	// only make 50 requests at a time. 
 	private static final int MAX_REQUESTS = 50;
     private int requests = 0;
@@ -27,6 +26,12 @@ public class WikiCrawler {
 		this.topics = topics;
 	}
 
+	/**
+	 * Method to extract the links from a Wikipedia page. 
+	 * Extracts all links after the first paragraph tag.
+	 * @param doc
+	 * @return
+	 */
 	public ArrayList<String> extractLinks(String doc) {
 		ArrayList<String> page_links = new ArrayList<String>();
 		/*
@@ -63,7 +68,7 @@ public class WikiCrawler {
 			visited.add(this.seed_url);
 			// while the queue is not empty
 			while(!page_queue.isEmpty()) { 
-				String current_page = page_queue.remove();
+				String current_page = page_queue.poll();
 				// request current
 				String current_page_html = getPageAsString(current_page);
 				// extract all links
@@ -83,7 +88,6 @@ public class WikiCrawler {
 						if(visited.contains(link)){
 							graph.addEdge(current_page, link);
 						}
-						//break;
 					}
 				}
 			}
@@ -112,6 +116,10 @@ public class WikiCrawler {
 	 */
 	private String getPageAsString(String current_url) throws InterruptedException, IOException{
 		// do not do more than 50 requests at a time.
+		if(html_pages.get(current_url)!= null){
+			return html_pages.get(current_url);
+		}
+
 		if(this.requests >= MAX_REQUESTS) { 
 			Thread.sleep(3000);
 			this.requests = 0;
@@ -133,6 +141,7 @@ public class WikiCrawler {
 		}
 		
 		String final_page = builder.toString();
+		html_pages.put(current_url, final_page);
 		this.requests += 1; 
 		return final_page;
 	}
@@ -143,17 +152,20 @@ public class WikiCrawler {
 	 * @return true if page contains all topics, false otherwise
 	 */
 	private boolean pageHasTopics(String page_html){
-		for (String topic : this.topics) { 
-			if(!page_html.contains(topic)) { 
-				return false; 
+		for (String topic : this.topics) {
+			Pattern link_pattern = Pattern.compile(topic,  Pattern.CASE_INSENSITIVE|Pattern.DOTALL);
+			Matcher matcher = link_pattern.matcher(page_html);
+			if(!matcher.find()) {
+				return false;
 			}
-			
+
 		}
 		return true;
 	}
+
 	
 	/**
-	 * 
+	 * Method to write a WebGraph object to a file.
 	 * @param g
 	 * @throws IOException 
 	 */
