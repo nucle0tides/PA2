@@ -7,12 +7,10 @@ public class GraphProcessor {
 
 	public WebGraph graph;
 	private int num_vertices;
-	private boolean is_strongly_connected;
-	
+
 	public GraphProcessor(String graphData) throws FileNotFoundException { 
 		this.graph = new WebGraph();
 		constructGraph(graphData);
-		this.is_strongly_connected = isStronglyConnected();
 	}
 	
 	/**
@@ -42,10 +40,10 @@ public class GraphProcessor {
 	    bfs_queue.add(u);
 	    visited.add(u);
 	    parent.put(u, null);
-	    
-	    if(u.equals(v)) { 
-	    	ArrayList<String> path = new ArrayList<String>();
-	    	path.add(v);
+
+		if(u.equals(v)) {
+			ArrayList<String> path = new ArrayList<String>();
+			path.add(v);
 	    	return path;
 	    }
 	    
@@ -65,7 +63,7 @@ public class GraphProcessor {
 				}
 			}
 	    }
-	    
+
 	    String path_vertex = parent.get(v);
 	    if(path_vertex == null) { 
 	    	return new ArrayList<String>();
@@ -95,22 +93,20 @@ public class GraphProcessor {
 	 * @return diameter of the graph. 
 	 */
 	public int diameter() { 
-		if(this.is_strongly_connected) { 
-			int longest_path = 0;
-			ArrayList<String> vertices = graph.getVertices();
-			for (String v1: vertices) { 
-				for (String v2: vertices) { 
-					ArrayList<String> path = bfsPath(v1, v2);
-					if(path.size() > longest_path) { 
-						longest_path = path.size();
-					}
+		int longest_path = 0;
+		ArrayList<String> vertices = graph.getVertices();
+		for (String v1: vertices) {
+			for (String v2: vertices) {
+				ArrayList<String> path = bfsPath(v1, v2);
+				if(path.isEmpty()){
+					return 2 * this.num_vertices;
+				}
+				if(path.size() > longest_path) {
+					longest_path = path.size();
 				}
 			}
-			return longest_path;
 		}
-		else { 
-			return 2 * this.num_vertices;
-		}
+		return longest_path;
 	}
 	
 	/**
@@ -124,23 +120,21 @@ public class GraphProcessor {
 	public int centrality(String v) { 
 		ArrayList<ArrayList<String>> paths = new ArrayList<ArrayList<String>>();
 		ArrayList<String> vertices = graph.getVertices();
+		int path_counts = 0;
 		for (String v1 : vertices) { 
 			for (String v2 : vertices) {
-				paths.add(bfsPath(v1, v2));
-			}
-		}
-		int path_counts = 0;
-		for (ArrayList<String> path : paths) { 
-			if(path.contains(v)) {
-				//Checking for self-paths, if we have the
-				//path start and end at the vertex,
-				//and it is the only thing in the path, it is a self path.
-				path.remove(v);
-				if(path.size() != 0){
-					path_counts += 1;
+				ArrayList<String> pathresult = bfsPath(v1, v2);
+				if(pathresult.contains(v)){
+					if(pathresult.size() == 1 && pathresult.get(0).equals(v)){
+						break;
+					}else {
+						path_counts++;
+					}
 				}
+				paths.add(pathresult);
 			}
 		}
+
 		return path_counts;
 	}
 	
@@ -169,68 +163,7 @@ public class GraphProcessor {
 		line_scanner.close();
 	}
 	
-	/**
-	 * Method to determine whether a graph is strongly connected 
-	 * i.e., each node can reach every other node
-	 * @return
-	 */
-	private boolean isStronglyConnected() { 
-		ArrayList<String> vertices = graph.getVertices();
-		for (String v1 : vertices) { 
-			for (String v2 : vertices) { 
-				if(!v1.equals(v2)) { 
-					if(!bfsPathExists(v1, v2)) { 
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
-	
-	/** 
-	 * Method to determine if there exists a path between 
-	 * @param u
-	 * @param v
-	 * @return
-	 */
-	private boolean bfsPathExists(String u, String v) { 
-	    Queue<String> bfs_queue = new ArrayDeque<>();
-	    HashSet<String> visited = new HashSet<String>();
-	    HashMap<String, String> parent = new HashMap<String, String>();
-	    
-	    bfs_queue.add(u);
-	    visited.add(u);
-	    parent.put(u, null);
-	    
-	    if(u.equals(v)) { 
-	    	return false; 
-	    }
-	    
-	    // while queue is not empty
-	    while(!bfs_queue.isEmpty()) { 
-	    	String current = bfs_queue.remove();
-	    	ArrayList<String> edges = graph.getAdjacencyMatrix().get(current);
-	    	// for each edge, w, current -> w
-			if(edges != null) {
-				for (String edge : edges) {
-					// if edge is unvisited
-					if (!visited.contains(edge)) {
-						parent.put(edge, current);
-						bfs_queue.add(edge);
-						visited.add(edge);
-					}
-				}
-			}
-	    }
-	    
-	    String path_vertex = parent.get(v);
-	    if(path_vertex == null) { 
-	    	return false;
-	    }
-	    
-	    return true;
-	}
+
 	
 	public static void main(String[] args) throws FileNotFoundException {
 		GraphProcessor gp = new GraphProcessor("/home/nick/Documents/Github/PA2/WikiCS.txt");
@@ -270,6 +203,9 @@ public class GraphProcessor {
 		}
 
 		System.out.println("Largest centrality: " + centrality+ ". vertex: "+ vertex_with_largest_centrality);
-		
+
+		System.out.println("Diameter: "+gp.diameter());
+
+
 	}
 }
